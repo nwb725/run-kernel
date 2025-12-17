@@ -32,7 +32,7 @@ fn build_nixos_expression(config: &RunConfig) -> Result<PathBuf> {
 }
 
 pub(crate) fn run_kernel(config: &RunConfig) -> Result {
-    let build_dir = build_nixos_expression(config)?;
+    let build_dir = build_nixos_expression(config).context("Failed to build nixos expression")?;
 
     let virtio_daemons = config
         .shares_iter()?

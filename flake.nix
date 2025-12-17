@@ -46,6 +46,8 @@
           pname = "run-kernel";
           version = "0.1.0";
           src = ./.;
+          #buildType = "debug";
+          #dontStrip = true;
           cargoLock = { lockFile = ./Cargo.lock; };
           doCheck = false;
           nativeBuildInputs = [ pkgs.gnumake pkgs.pkg-config pkgs.perl ];
