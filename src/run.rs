@@ -120,9 +120,16 @@ fn virtiofs_get_socket_path(config: &RunConfig, path: &Path) -> Result<PathBuf> 
 
 fn virtiofsd_cmd(config: &RunConfig, tag: &str, path: &Path) -> Result<Command> {
     let socket_path = virtiofs_get_socket_path(config, path)?;
-    let mut command = Command::new("podman");
+    let mut command = Command::new("unshare");
     command
-        .args(["unshare", "--", &config.virtiofsd])
+        .args([
+            "--user",
+            "--mount",
+            "--map-auto",
+            "--map-root-user",
+            "--",
+            &config.virtiofsd,
+        ])
         .arg("--socket-path")
         .arg(socket_path)
         .arg("--tag")

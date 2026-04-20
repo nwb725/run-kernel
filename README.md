@@ -47,10 +47,14 @@ run-kernel --serial=stdio --share=share:./ --flake=./nixos --kernel=<path/to/you
 
 # Requirements
 
- - cargo
+ - cargo (build-time only)
  - virtiofsd
  - qemu
- - podman (for `unshare` subcommand)
+ - util-linux (for `unshare`; ≥ 2.39 for `--map-auto`)
+ - uidmap (provides `newuidmap`/`newgidmap`, required by `unshare --map-auto`;
+   must be installed setuid-root by the host — not wrapped into the package)
+ - entries in `/etc/subuid` and `/etc/subgid` for the invoking user
+ - openssh (for the `ssh` client used to talk to the VM)
  - nix
 
 ## Kernel configuration
