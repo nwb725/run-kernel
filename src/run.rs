@@ -45,13 +45,25 @@ pub(crate) fn run_kernel(config: &RunConfig) -> Result {
         })
         .collect::<Result<Vec<_>>>()?;
 
-    let virtio_guard = drop_guard::guard(virtio_daemons, |daemons| {
+    let mut virtio_guard = drop_guard::guard(virtio_daemons, |daemons| {
         for mut daemon in daemons {
-            daemon.kill().expect("Failed to kill daemon");
+            let _ = daemon.kill();
         }
     });
 
     sleep(Duration::from_secs(1));
+
+    // spawn() only catches exec failures; unshare/virtiofsd can still exit
+    // shortly after (bad subid mapping, missing socket dir, ...). Poll each
+    // child so we surface that instead of silently launching qemu against a
+    // socket nobody is listening on.
+    for daemon in virtio_guard.iter_mut() {
+        if let Some(status) = daemon.try_wait()? {
+            return Err(anyhow!(
+                "virtiofsd/unshare exited before qemu launch: {status}"
+            ));
+        }
+    }
 
     let mut initrd = tempfile::NamedTempFile::new()?;
     initrd.write_all(INITRD)?;
