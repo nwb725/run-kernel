@@ -97,6 +97,9 @@ pub(crate) struct RunConfig {
 
     #[source(clap, config, default = "String::from(\"./nixos\")")]
     pub(crate) flake: String,
+
+    #[source(clap, config, default = "None")]
+    pub(crate) offline: Option<String>,
 }
 
 fn validate_share(share: impl AsRef<str>) -> Result<(String, PathBuf)> {

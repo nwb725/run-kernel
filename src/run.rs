@@ -18,6 +18,13 @@ type Result<T = ()> = anyhow::Result<T>;
 const INITRD: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/initrd.img"));
 
 fn build_nixos_expression(config: &RunConfig) -> Result<PathBuf> {
+    if let Some(prebuilt) = &config.offline {
+        let path = std::fs::canonicalize(prebuilt).expect(&format!(
+            "Prebuilt flake path not in nix store: {}",
+            prebuilt
+        ));
+        return Ok(path);
+    }
     let flake = format!(
         "{}#nixosConfigurations.vm.config.system.build.toplevel",
         config.flake
